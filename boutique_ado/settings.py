@@ -82,6 +82,7 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+# Temporarily send auth emails to backend
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'

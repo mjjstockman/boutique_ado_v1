@@ -13,7 +13,7 @@ body {
 }
 
 /* from Bulma. Makes font-awesome icons always stay centred and have a consistent size
-unless we manually change it. */
+unless  manually change. */
 .icon {
     align-items: center;
     display: inline-flex;
@@ -26,7 +26,7 @@ unless we manually change it. */
     text-transform: uppercase;
 }
 
-/* so logo only takes up enough spave to fit content */
+/* so logo only takes up enough space to fit content */
 .main-logo-link {
     width: fit-content;
 }
@@ -60,13 +60,17 @@ unless we manually change it. */
     border: 1px solid black !important;
 }
 
+.bg-black {
+    background: #000 !important;
+}
+
 /* -------------------------------- Media Queries */
 
 /* Slightly larger container on xl screens */
 @media (min-width: 1200px) {
-  .container {
-    max-width: 80%;
-  }
+    .container {
+        max-width: 80%;
+    }
 }
 
 /* fixed top navbar only on medium and up */
@@ -79,10 +83,8 @@ unless we manually change it. */
         z-index: 1030;
     }
 
+    /* pushes body below main page header */
     .header-container {
         padding-top: 164px;
     }
 }
-
-
-

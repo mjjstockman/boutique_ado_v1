@@ -64,6 +64,17 @@ unless  manually change. */
     background: #000 !important;
 }
 
+/* to cover background img */
+.overlay {
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    background: white;
+    z-index: -1;
+}
+
 /* -------------------------------- Media Queries */
 
 /* Slightly larger container on xl screens */

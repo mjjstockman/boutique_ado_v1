@@ -99,3 +99,15 @@ unless  manually change. */
         padding-top: 164px;
     }
 }
+
+/* pad the top a bit when navbar is collapsed on mobile */
+@media (max-width: 991px) {
+    .header-container {
+        padding-top: 116px;
+    }
+
+    /* pushes body below main page header */
+    body {
+        height: calc(100vh - 116px);
+    }
+}

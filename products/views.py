@@ -26,6 +26,10 @@ def all_products(request):
                 sortkey = 'lower_name'
                 # copy sort param into new var called sortkey to preserve value of sort to use later
                 products = products.annotate(lower_name=Lower('name'))
+            if sortkey == 'category':
+                # double underscore to use related model
+                # use category name rather than ID
+                sortkey = 'category__name'
 
             if 'direction' in request.GET:
                 direction = request.GET['direction']

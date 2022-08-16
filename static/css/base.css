@@ -75,6 +75,12 @@ unless  manually change. */
     z-index: -1;
 }
 
+/* invert colours on hover */
+a.category-badge>span.badge:hover {
+    background: #212529 !important;
+    color: #fff !important;
+}
+
 /* -------------------------------- Media Queries */
 
 /* Slightly larger container on xl screens */

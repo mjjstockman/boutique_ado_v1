@@ -50,7 +50,23 @@
                 <form class="form" action="{% url 'add_to_bag' product.id %}" method="POST">
                     {% csrf_token %}
                     <div class="form-row">
+                        <!-- get all products that has sizes -->
+                        {% with product.has_sizes as s %}
+                        {% if s %}
                         <div class="col-12">
+                            <p><strong>Size:</strong></p>
+                            <select class="form-control rounded-0 w-50" name="product_size" id='id_product_size'>
+                                <option value="xs">XS</option>
+                                <option value="s">S</option>
+                                <!-- default selection -->
+                                <option value="m" selected>M</option>
+                                <option value="l">L</option>
+                                <option value="xl">XL</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                        <!-- add top margin if product has sizes -->
+                        <div class="col{% if s %}-12 mt-2{% endif %}">
                             <p class="mt-3"><strong>Quantity:</strong></p>
                             <div class="form-group w-50">
                                 <div class="input-group">
@@ -72,6 +88,7 @@
                         <!-- use request.path attribute for current url as hidden input field named redirect_url  -->
                         <!-- can use this in view form is submitted to so can redirect back to same page once product -->
                         <input type="hidden" name="redirect_url" value="{{ request.path }}">
+                        {% endwith %}
                     </div>
                 </form>
             </div>

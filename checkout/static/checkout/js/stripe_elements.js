@@ -6,10 +6,10 @@
 */
 
 // get the keys, slice off the quotation
-var stripe_public_key = $('#id_stripe_public_key').text().slice(1, -1);
-var client_secret = $('#id_client_secret').text().slice(1, -1);
+var stripePublicKey = $('#id_stripe_public_key').text().slice(1, -1);
+var clientSecret = $('#id_client_secret').text().slice(1, -1);
 // create var using stripe key
-var stripe = Stripe(stripe_public_key);
+var stripe = Stripe(stripePublicKey);
 // create instance of stripe elements
 var elements = stripe.elements();
 // add styles (from stripe js docs)
@@ -38,6 +38,7 @@ card.mount('#card-element');
 
 // Handle realtime validation errors on the card element
 // listen for any changes to the card
+// taken from stripe docs
 card.addEventListener('change', function (event) {
     var errorDiv = document.getElementById('card-errors');
     if (event.error) {
@@ -58,6 +59,7 @@ var form = document.getElementById('payment-form');
 
 form.addEventListener('submit', function (ev) {
     ev.preventDefault();
+    // prevent multiple submissions
     card.update({
         'disabled': true
     });
@@ -75,6 +77,7 @@ form.addEventListener('submit', function (ev) {
                 </span>
                 <span>${result.error.message}</span>`;
             $(errorDiv).html(html);
+            // reenable card element so can fix errors and resubmit
             card.update({
                 'disabled': false
             });

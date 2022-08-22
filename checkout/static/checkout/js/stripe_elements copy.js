@@ -5,10 +5,14 @@
     https://stripe.com/docs/stripe-js
 */
 
+// get the keys, slice off the quotation
 var stripePublicKey = $('#id_stripe_public_key').text().slice(1, -1);
 var clientSecret = $('#id_client_secret').text().slice(1, -1);
+// create var using stripe key
 var stripe = Stripe(stripePublicKey);
+// create instance of stripe elements
 var elements = stripe.elements();
+// add styles (from stripe js docs)
 var style = {
     base: {
         color: '#000',
@@ -24,12 +28,17 @@ var style = {
         iconColor: '#dc3545'
     }
 };
+//  create card element and add the style
 var card = elements.create('card', {
     style: style
 });
+// mount card to the div
 card.mount('#card-element');
 
+
 // Handle realtime validation errors on the card element
+// listen for any changes to the card
+// taken from stripe docs
 card.addEventListener('change', function (event) {
     var errorDiv = document.getElementById('card-errors');
     if (event.error) {
@@ -49,7 +58,9 @@ card.addEventListener('change', function (event) {
 var form = document.getElementById('payment-form');
 
 form.addEventListener('submit', function (ev) {
+    // listener stops form submitting straight away
     ev.preventDefault();
+    // prevent multiple submissions
     card.update({
         'disabled': true
     });
@@ -57,9 +68,13 @@ form.addEventListener('submit', function (ev) {
     $('#payment-form').fadeToggle(100);
     $('#loading-overlay').fadeToggle(100);
 
+    // create vars to capture form data can't add to intent yet. post to view
+    // below
+    // was save info checked?
     var saveInfo = Boolean($('#id-save-info').attr('checked'));
     // From using {% csrf_token %} in the form
     var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+    // put data in a dict
     var postData = {
         'csrfmiddlewaretoken': csrfToken,
         'client_secret': clientSecret,
@@ -67,7 +82,12 @@ form.addEventListener('submit', function (ev) {
     };
     var url = '/checkout/cache_checkout_data/';
 
+    // post data to view
+    // use .done method so waits for response that the payment intent was updated
+    // before confirming payment
     $.post(url, postData).done(function () {
+        // as payment intent.success webhook comes from stripe not own code, it wont
+        // have the form data, so place data into the intent object
         stripe.confirmCardPayment(clientSecret, {
             payment_method: {
                 card: card,
@@ -100,13 +120,14 @@ form.addEventListener('submit', function (ev) {
             if (result.error) {
                 var errorDiv = document.getElementById('card-errors');
                 var html = `
-                    <span class="icon" role="alert">
-                    <i class="fas fa-times"></i>
-                    </span>
-                    <span>${result.error.message}</span>`;
+            <span class="icon" role="alert">
+            <i class="fas fa-times"></i>
+            </span>
+            <span>${result.error.message}</span>`;
                 $(errorDiv).html(html);
                 $('#payment-form').fadeToggle(100);
                 $('#loading-overlay').fadeToggle(100);
+                // reenable card element so can fix errors and resubmit
                 card.update({
                     'disabled': false
                 });

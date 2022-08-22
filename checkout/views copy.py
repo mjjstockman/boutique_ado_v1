@@ -11,9 +11,12 @@ from bag.contexts import bag_contents
 import stripe
 import json
 
+
 @require_POST
+# checks if user wanted info saved
 def cache_checkout_data(request):
     try:
+        # get client secret from payment intent and split so get payment intent id
         pid = request.POST.get('client_secret').split('_secret')[0]
         stripe.api_key = settings.STRIPE_SECRET_KEY
         stripe.PaymentIntent.modify(pid, metadata={
@@ -32,9 +35,12 @@ def checkout(request):
     stripe_public_key = settings.STRIPE_PUBLIC_KEY
     stripe_secret_key = settings.STRIPE_SECRET_KEY
 
+    # will be POST when user submits payment info
     if request.method == 'POST':
         bag = request.session.get('bag', {})
 
+        # put form data in dict so can add to form below
+        # doing manually and not using django forms so can skip the save_info box which isn't in this model
         form_data = {
             'full_name': request.POST['full_name'],
             'email': request.POST['email'],
@@ -48,15 +54,13 @@ def checkout(request):
         }
         order_form = OrderForm(form_data)
         if order_form.is_valid():
-            # commit-False prevents multiple save events
-            order = order_form.save(commit=False)
-            pid = request.POST.get('client_secret').split('_secret')[0]
-            order.stripe_pid = pid
-            order.original_bag = json.dumps(bag)
-            order.save()
+            order = order_form.save()
+            #  loop through bag_items to create lineitems
             for item_id, item_data in bag.items():
                 try:
+                    # get product_id from bag
                     product = Product.objects.get(id=item_id)
+                    # if it's an integer, item doesn't have sizes (so quantity is item_data)
                     if isinstance(item_data, int):
                         order_line_item = OrderLineItem(
                             order=order,
@@ -65,6 +69,7 @@ def checkout(request):
                         )
                         order_line_item.save()
                     else:
+                        # if has sizes loop through each size to add to line item
                         for size, quantity in item_data['items_by_size'].items():
                             order_line_item = OrderLineItem(
                                 order=order,
@@ -73,20 +78,24 @@ def checkout(request):
                                 product_size=size,
                             )
                             order_line_item.save()
+                # error msg if item not found...
                 except Product.DoesNotExist:
                     messages.error(request, (
                         "One of the products in your bag wasn't found in our database. "
                         "Please call us for assistance!")
                     )
+                    # ... and delete the order
                     order.delete()
                     return redirect(reverse('view_bag'))
 
+            # does session say user wanted to save their info?
             request.session['save_info'] = 'save-info' in request.POST
-            return redirect(reverse('checkout_success', args=[order.order_number]))
+            return redirect(reverse('checkout_success', args=[order.order_number]))  
         else:
             messages.error(request, 'There was an error with your form. \
-                Please double check your information.')
+                Please double check your information.')  
     else:
+        # if not submitting payment info will be a GET request
         bag = request.session.get('bag', {})
         if not bag:
             messages.error(request, "There's nothing in your bag at the moment")
@@ -127,6 +136,7 @@ def checkout_success(request, order_number):
         Your order number is {order_number}. A confirmation \
         email will be sent to {order.email}.')
 
+    # delete bag from session
     if 'bag' in request.session:
         del request.session['bag']
 
